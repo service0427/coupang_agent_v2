@@ -1,0 +1,23 @@
+{
+  "proxies": [
+    {
+      "id": "proxy1",
+      "server": "socks5://112.161.54.7:10011",
+      "name": "Korea Proxy 1",
+      "active": true
+    },
+    {
+      "id": "proxy2",
+      "server": "socks5://112.161.54.8:10016",
+      "name": "Korea Proxy 2",
+      "active": true
+    },
+    {
+      "id": "proxy3",
+      "server": "socks5://112.161.54.9:10016",
+      "name": "Korea Proxy 3",
+      "active": false
+    }
+  ],
+  "defaultMode": "none"
+}

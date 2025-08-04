@@ -1,0 +1,52 @@
+# Node modules
+node_modules/
+
+# Environment files (더 이상 사용하지 않지만 혹시 몰라서)
+.env
+.env.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# IDE Files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Test files
+*.test.js
+coverage/
+
+# Build outputs
+dist/
+build/
+
+# Temporary files
+temp/
+tmp/
+*.tmp
+
+# Database backups
+*.sql.bak
+backup/
+
+# Chrome profile data
+chrome-profile/
+user-data-dir/
+browser-data/
+
+# Project specific directories to ignore
+scripts/
+sql/
+tests/
+tools/
+
+# Data tracking directory
+data/
