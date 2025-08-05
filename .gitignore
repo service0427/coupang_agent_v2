@@ -44,9 +44,12 @@ browser-data/
 
 # Project specific directories to ignore
 scripts/
-sql/
 tests/
-tools/
+
+# Ignore only specific files in sql/ and tools/
+sql/*.tmp
+sql/backup_*
+tools/temp_*
 
 # Data tracking directory
 data/
