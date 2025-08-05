@@ -50,3 +50,9 @@ tools/
 
 # Data tracking directory
 data/
+
+# Database migrations
+migrations/
+
+# Analysis reports
+reports/

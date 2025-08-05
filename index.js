@@ -4,8 +4,8 @@
 
 const dbService = require('./lib/services/db-service');
 const { parseArgs, printHelp } = require('./lib/utils/cli-parser');
-const { runIdMode } = require('./lib/runners/id-mode');
 const { runMultiMode } = require('./lib/runners/multi-mode');
+const cleanupReports = require('./cleanup-reports');
 
 // 메인 실행 함수
 async function main() {
@@ -17,16 +17,13 @@ async function main() {
   }
 
   try {
+    // 자동 리포트 정리 (silent 모드)
+    await cleanupReports(true);
+    
     let exitCode = 0;
     
-    // ID 모드가 최우선
-    if (options.id) {
-      exitCode = await runIdMode(options.id, options);
-    } else {
-      // 기본: agent의 모든 키워드 실행
-      console.log(`🚀 에이전트 '${options.agent}' 실행 시작\n`);
-      await runMultiMode(options);
-    }
+    console.log(`🚀 에이전트 '${options.agent}' 실행 시작\n`);
+    await runMultiMode(options);
     
     // DB 연결 종료
     await dbService.close();

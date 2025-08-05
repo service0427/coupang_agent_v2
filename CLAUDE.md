@@ -50,18 +50,24 @@ node tools/create-db.js
 
 2. **Browser Automation Layer** (`lib/core/`)
    - `chrome-launcher.js` - Manages Playwright Chrome instances with anti-detection features
-   - `search-optimizer.js` - Implements resource blocking for 50-70% performance improvement
+   - `optimizer.js` - Implements aggressive domain-based resource filtering for 500KB traffic target
 
 3. **Business Logic** (`lib/handlers/`)
    - `coupang-handler.js` - Main Coupang site automation logic
    - `cart-handler.js` - Shopping cart interaction workflows
+   - `product-finder.js` - Product search and selection logic
 
 4. **Service Layer** (`lib/services/`)
    - `db-service.js` - PostgreSQL integration for keyword management and logging
    - `proxy-manager.js` - Proxy rotation and management
    - `error-logger.js` - Centralized error tracking
 
-5. **Database Schema** (`sql/v2_create_tables.sql`)
+5. **Network Analysis** (`lib/network/`)
+   - `monitor.js` - Real-time network traffic monitoring using CDP
+   - `analyzer.js` - Network traffic analysis and reporting
+   - `block-analyzer.js` - Blocked resource analysis and optimization insights
+
+6. **Database Schema** (`sql/v2_create_tables.sql`)
    - `v2_test_keywords` - Stores search keywords and execution configuration
    - `v2_execution_logs` - Tracks all execution attempts with metrics
    - `v2_error_logs` - Captures and categorizes errors for analysis
@@ -69,7 +75,7 @@ node tools/create-db.js
 ### Key Design Patterns
 
 - **Anti-Detection**: The chrome-launcher implements multiple techniques to avoid bot detection (user agent spoofing, WebDriver hiding, viewport randomization)
-- **Resource Optimization**: Optional blocking of images, fonts, and media for faster page loads
+- **Resource Optimization**: Database-controlled blocking of images, fonts, and media for faster page loads (optimize column in v2_test_keywords)
 - **Proxy Management**: Supports sequential, random, and named proxy selection
 - **Error Recovery**: Comprehensive error logging with automatic retry mechanisms
 - **Concurrent Execution**: Built-in support for running multiple isolated browser instances
