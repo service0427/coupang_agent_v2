@@ -5,7 +5,7 @@
 const { Pool } = require('pg');
 const fs = require('fs');
 const path = require('path');
-const environment = require('../config/environment');
+const environment = require('../environment');
 
 async function createTables() {
   const pool = new Pool({

@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__smithery-ai-github__get_file_contents"
+    ],
+    "deny": []
+  }
+}
