@@ -1,0 +1,140 @@
+[
+  {
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('v2_test_keywords_id_seq'::regclass)"
+  },
+  {
+    "column_name": "date",
+    "data_type": "date",
+    "is_nullable": "NO",
+    "column_default": "CURRENT_DATE"
+  },
+  {
+    "column_name": "keyword",
+    "data_type": "character varying",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "column_name": "product_code",
+    "data_type": "character varying",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "column_name": "agent",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "column_name": "proxy_server",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "column_name": "cart_click_enabled",
+    "data_type": "boolean",
+    "is_nullable": "YES",
+    "column_default": "false"
+  },
+  {
+    "column_name": "max_executions",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": "100"
+  },
+  {
+    "column_name": "current_executions",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": "0"
+  },
+  {
+    "column_name": "success_count",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": "0"
+  },
+  {
+    "column_name": "fail_count",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": "0"
+  },
+  {
+    "column_name": "block_count",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": "0"
+  },
+  {
+    "column_name": "last_blocked_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "column_name": "last_executed_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": "CURRENT_TIMESTAMP"
+  },
+  {
+    "column_name": "tracking_key",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "column_name": "optimization_config",
+    "data_type": "jsonb",
+    "is_nullable": "YES",
+    "column_default": "'{\"ljc_allow\": [], \"mercury_allow\": [], \"front_cdn_allow\": [], \"image_cdn_allow\": [], \"img1a_cdn_allow\": [], \"assets_cdn_allow\": [], \"static_cdn_allow\": [], \"coupang_main_allow\": [\"document\"], \"thumbnail_cdn_allow\": [], \"coupang_main_block_patterns\": []}'::jsonb"
+  },
+  {
+    "column_name": "current_mode",
+    "data_type": "USER-DEFINED",
+    "is_nullable": "YES",
+    "column_default": "'goto'::search_mode"
+  },
+  {
+    "column_name": "consecutive_blocks",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": "0"
+  },
+  {
+    "column_name": "mode_execution_count",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": "0"
+  },
+  {
+    "column_name": "total_blocks",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": "0"
+  },
+  {
+    "column_name": "last_mode_change",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "column_name": "mode_switch_reason",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null
+  }
+]

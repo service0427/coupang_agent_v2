@@ -59,3 +59,32 @@ migrations/
 
 # Analysis reports
 reports/
+
+# Configuration files with sensitive data
+environment.js
+config/proxies.json
+config/database.json
+
+# SuperClaude directory (외부 도구)
+SuperClaude/
+
+# Archive backups
+*.tar.gz
+backup_*.tar.gz
+
+# Windows specific
+*.lnk
+
+# Package manager lock files (선택사항 - 협업시 포함할지 결정)
+# package-lock.json
+
+# Runtime files
+*.pid
+
+# Temporary analysis files
+tools/archive/
+temp_analysis_*.js
+
+# Log files from application
+execution_*.log
+error_*.log

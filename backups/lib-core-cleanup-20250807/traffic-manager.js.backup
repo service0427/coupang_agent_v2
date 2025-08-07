@@ -1,0 +1,175 @@
+/**
+ * 통합 네트워크 트래픽 관리자
+ * - NetworkMonitor와 NetworkAnalyzer 통합
+ * - CLI 옵션에 따른 로그 레벨 제어
+ * - USB 동글 환경에 최적화된 간단/상세 출력
+ */
+
+const NetworkMonitor = require('../network/monitor');
+const NetworkAnalyzer = require('../network/analyzer');
+
+class NetworkTrafficManager {
+  constructor(options = {}) {
+    this.verboseMode = options.verbose || false;
+    this.saveReports = options.saveReports || false;
+    this.monitor = new NetworkMonitor();
+    this.analyzer = new NetworkAnalyzer();
+    this.isActive = false;
+  }
+
+  /**
+   * 트래픽 모니터링 시작
+   */
+  async start(page) {
+    if (this.isActive) return;
+    
+    this.isActive = true;
+    await this.monitor.start(page);
+    
+    if (!this.verboseMode) {
+      console.log('📡 네트워크 모니터링 시작 (간단 모드)');
+    }
+  }
+
+  /**
+   * 트래픽 모니터링 중지 및 분석
+   */
+  async stop(keywordId = null, agent = null, optimizationContext = null) {
+    if (!this.isActive) return null;
+    
+    this.isActive = false;
+    await this.monitor.stop();
+    
+    const networkData = this.monitor.getData();
+    const analysisResult = this.analyzer.analyze(networkData, optimizationContext);
+    
+    // 디버그: ID 정보 확인
+    console.log(`🔍 TrafficManager.stop - keywordId: ${keywordId}, agent: ${agent}, verboseMode: ${this.verboseMode}`);
+    
+    // 출력 모드에 따른 로그
+    if (this.verboseMode) {
+      this.analyzer.printAnalysis(keywordId, agent);
+    } else {
+      this.printSimpleSummary(analysisResult, keywordId, agent);
+    }
+    
+    // 리포트 저장 (요청시에만)
+    if (this.saveReports && keywordId && agent) {
+      await this.analyzer.saveReport(keywordId, agent);
+      if (analysisResult.cacheStats && analysisResult.cacheStats.fromCache > 0) {
+        await this.analyzer.saveCacheReport(keywordId, agent);
+      }
+    }
+    
+    return analysisResult;
+  }
+
+  /**
+   * 간단 요약 출력 (기본 모드)
+   */
+  printSimpleSummary(analysisResult, keywordId = null, agent = null) {
+    const { summary, cacheStats, recommendations } = analysisResult;
+    
+    const idInfo = keywordId ? `[ID:${keywordId}] ` : '';
+    console.log(`\n📊 ${idInfo}트래픽 요약: ${summary.totalRequests}개 요청, ${summary.totalSizeInMB}MB`);
+    
+    // 캐시 효율성
+    if (cacheStats && cacheStats.fromCache > 0) {
+      const cachedRequests = analysisResult.requests.filter(req => req.fromCache);
+      const cachedSize = cachedRequests.reduce((sum, req) => sum + (req.size || 0), 0);
+      const cacheSavingsMB = (cachedSize / 1024 / 1024).toFixed(2);
+      
+      console.log(`💾 캐시 절감: ${cacheStats.fromCache}개 (${cacheStats.cacheHitRate}%) → ${cacheSavingsMB}MB 절약`);
+    }
+    
+    // 주요 권장사항만 표시
+    const highPriorityRecs = recommendations.filter(rec => rec.priority === 'HIGH');
+    if (highPriorityRecs.length > 0) {
+      console.log(`💡 최적화 기회: ${highPriorityRecs.length}개`);
+      highPriorityRecs.slice(0, 2).forEach(rec => {
+        if (rec.savingPotential) {
+          console.log(`   - ${rec.type}: ${rec.savingPotential} 절약 가능`);
+        }
+      });
+    }
+    
+    // 전체 효율성 점수
+    const efficiencyScore = this.calculateEfficiencyScore(analysisResult);
+    console.log(`⚡ 효율성 점수: ${efficiencyScore}/100`);
+  }
+
+  /**
+   * 효율성 점수 계산 (0-100)
+   */
+  calculateEfficiencyScore(analysisResult) {
+    const { summary, cacheStats, recommendations } = analysisResult;
+    let score = 70; // 기본 점수
+    
+    // 캐시 효율성 점수 (30점)
+    if (cacheStats) {
+      const cacheHitRate = parseFloat(cacheStats.cacheHitRate || 0);
+      score += Math.min(30, cacheHitRate * 0.3);
+    }
+    
+    // 트래픽 크기 점수 (음수 가능)
+    const sizeInMB = parseFloat(summary.totalSizeInMB);
+    if (sizeInMB <= 0.5) score += 20;      // 0.5MB 이하: 만점
+    else if (sizeInMB <= 1.0) score += 15; // 1MB 이하: 우수
+    else if (sizeInMB <= 2.0) score += 10; // 2MB 이하: 양호
+    else if (sizeInMB <= 5.0) score += 5;  // 5MB 이하: 보통
+    else score -= 10; // 5MB 초과: 감점
+    
+    // 권장사항 페널티
+    const highPriorityIssues = recommendations.filter(rec => rec.priority === 'HIGH').length;
+    score -= highPriorityIssues * 5;
+    
+    return Math.max(0, Math.min(100, Math.round(score)));
+  }
+
+  /**
+   * 상세 분석 출력 강제 실행
+   */
+  printDetailedAnalysis() {
+    if (this.analyzer.analysisResults) {
+      this.analyzer.printAnalysis();
+    } else {
+      console.log('⚠️ 분석 결과가 없습니다. 먼저 트래픽 모니터링을 실행하세요.');
+    }
+  }
+
+  /**
+   * 캐시 효율성 실시간 확인
+   */
+  getCurrentCacheStats() {
+    const data = this.monitor.getData();
+    const { cacheStats } = data;
+    
+    if (cacheStats.total === 0) {
+      return { message: '아직 캐시 데이터가 없습니다.' };
+    }
+    
+    const cachedRequests = data.requests.filter(req => req.fromCache);
+    const cacheSavingsMB = cachedRequests.reduce((sum, req) => sum + (req.size || 0), 0) / 1024 / 1024;
+    
+    return {
+      total: cacheStats.total,
+      cached: cacheStats.fromCache,
+      hitRate: cacheStats.cacheHitRate,
+      savingsMB: cacheSavingsMB.toFixed(2),
+      memoryCache: cacheStats.fromMemoryCache,
+      diskCache: cacheStats.fromDiskCache
+    };
+  }
+
+  /**
+   * 리소스 정리
+   */
+  async cleanup() {
+    if (this.isActive) {
+      await this.stop();
+    }
+    this.monitor.reset();
+  }
+}
+
+module.exports = NetworkTrafficManager;
