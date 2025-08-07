@@ -88,3 +88,25 @@ temp_analysis_*.js
 # Log files from application
 execution_*.log
 error_*.log
+
+# Development and analysis files (개발용 파일들)
+analysis-*.md
+analysis-*.csv
+analysis-*.html
+*-analysis-*.html
+comprehensive-*.html
+keywords-analysis-*.html
+2025-*.md
+CACHE_SETTINGS_MEMO.md
+backups/
+
+# Claude Code specific
+.claude/
+
+# Temporary analysis files
+*.csv
+*.html
+!index.html
+
+# Allowed requests monitoring logs
+allowed-requests-*.txt
