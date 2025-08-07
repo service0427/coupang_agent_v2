@@ -98,7 +98,24 @@ comprehensive-*.html
 keywords-analysis-*.html
 2025-*.md
 CACHE_SETTINGS_MEMO.md
+REFACTORING.md
+cleanup-reports.js
+
+# Backup and archive files
 backups/
+backup_*.tar.gz
+*.tar.gz
+
+# Browser profile data (runtime generated)
+browser-data/
+chrome-profile/
+user-data-dir/
+
+# Runtime data and logs
+data/
+reports/
+migrations/
+sql/
 
 # Claude Code specific
 .claude/
@@ -110,3 +127,6 @@ backups/
 
 # Allowed requests monitoring logs
 allowed-requests-*.txt
+
+# Package lock file (자동 생성됨)
+package-lock.json
