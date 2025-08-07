@@ -66,7 +66,9 @@ async function smartCacheStrategy() {
     
     // 3. 프로필별 캐시 크기 분석
     console.log('\n💾 프로필별 캐시 현황:');
-    const profilePath = 'd:\\\\dev\\\\git\\\\dev_coupang_chrome\\\\browser-data';
+    // OS 독립적 경로 처리
+    const path = require('path');
+    const profilePath = path.join(process.cwd(), 'browser-data');
     
     const fs = require('fs').promises;
     

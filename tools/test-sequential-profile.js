@@ -230,7 +230,9 @@ async function cleanup(agentName) {
     return;
   }
   
-  const basePath = `d:\\dev\\git\\dev_coupang_chrome\\browser-data\\${agentName}`;
+  // OS 독립적 경로 처리
+  const path = require('path');
+  const basePath = path.join(process.cwd(), 'browser-data', agentName);
   
   try {
     await fs.rm(basePath, { recursive: true, force: true });

@@ -8,8 +8,8 @@
 const { chromium } = require('playwright');
 const path = require('path');
 
-// 고정 설정
-const PROFILE_PATH = 'd:\\dev\\git\\dev_coupang_chrome\\browser-data\\chrome';
+// OS 독립적 경로 처리
+const PROFILE_PATH = path.join(process.cwd(), 'browser-data', 'chrome');
 const TEST_URL = 'https://www.coupang.com';
 
 /**

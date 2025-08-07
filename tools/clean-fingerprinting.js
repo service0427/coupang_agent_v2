@@ -10,7 +10,8 @@ const path = require('path');
 
 async function cleanFingerprinting() {
   const profileName = process.argv[2] || 'chrome'; // 기본값: chrome
-  const profilePath = path.join('d:', 'dev', 'git', 'dev_coupang_chrome', 'browser-data', profileName);
+  // OS 독립적 경로 처리
+  const profilePath = path.join(process.cwd(), 'browser-data', profileName);
   
   console.log('🧹 핑거프린팅 데이터 정리 시작');
   console.log(`📁 대상 프로필: ${profilePath}\n`);
@@ -77,7 +78,8 @@ async function checkProfileStatus(profilePath, stage) {
  */
 async function showAvailableProfiles() {
   try {
-    const browserDataPath = path.join('d:', 'dev', 'git', 'dev_coupang_chrome', 'browser-data');
+    // OS 독립적 경로 처리
+    const browserDataPath = path.join(process.cwd(), 'browser-data');
     const profiles = await fs.readdir(browserDataPath);
     
     profiles.forEach(profile => {
