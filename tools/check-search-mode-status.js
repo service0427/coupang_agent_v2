@@ -1,52 +1,73 @@
+/**
+ * 현재 로컬의 검색 모드 상태 확인
+ */
+
 const dbServiceV2 = require('../lib/services/db-service-v2');
 
 async function checkSearchModeStatus() {
-  console.log('=== SearchMode 상태 확인 ===\n');
+  console.log('🔍 현재 검색 모드 상태 확인');
   
   try {
-    // 에이전트 상태
-    const statusResult = await dbServiceV2.query(`
-      SELECT * FROM v2_search_mode_status ORDER BY agent
-    `);
+    // 최근 2시간 실행 모드 확인
+    const agentModes = await dbServiceV2.query(\);
     
-    console.log('📊 에이전트별 검색 모드 상태:');
-    if (statusResult.rows.length === 0) {
-      console.log('  등록된 에이전트가 없습니다.');
+    console.log('\n📊 에이전트별 실행 모드:');
+    console.log('─'.repeat(50));
+    
+    const agentSummary = {};
+    agentModes.rows.forEach(row => {
+      if (\!agentSummary[row.agent]) {
+        agentSummary[row.agent] = { goto: null, search: null };
+      }
+      const mode = row.search_mode ? 'search' : 'goto';
+      agentSummary[row.agent][mode] = {
+        count: parseInt(row.execution_count),
+        success: parseInt(row.success_count),
+        lastExecution: row.last_execution
+      };
+    });
+    
+    let gotoTotal = 0, searchTotal = 0;
+    
+    Object.entries(agentSummary).forEach(([agent, modes]) => {
+      console.log(\);
+      
+      if (modes.goto) {
+        const rate = ((modes.goto.success / modes.goto.count) * 100).toFixed(1);
+        console.log(\);
+        gotoTotal += modes.goto.count;
+      }
+      
+      if (modes.search) {
+        const rate = ((modes.search.success / modes.search.count) * 100).toFixed(1);
+        console.log(\);
+        searchTotal += modes.search.count;
+      }
+      
+      // 현재 모드
+      let currentMode = 'goto';
+      if (modes.goto && modes.search) {
+        currentMode = new Date(modes.goto.lastExecution) > new Date(modes.search.lastExecution) ? 'goto' : 'search';
+      } else if (modes.search) {
+        currentMode = 'search';
+      }
+      
+      console.log(\);
+    });
+    
+    console.log('\n📊 전체 통계:');
+    console.log(\);
+    console.log(\);
+    
+    if (searchTotal > gotoTotal) {
+      console.log('\n🔍 현재 주로 SEARCH 모드 사용 중');
+      console.log('💭 GOTO에서 에러 발생으로 SEARCH로 전환된 것으로 보임');
     } else {
-      statusResult.rows.forEach(row => {
-        console.log(`  ${row.agent}:`);
-        console.log(`    현재 모드: ${row.current_mode}`);
-        console.log(`    goto 연속 차단: ${row.goto_consecutive_blocks}회`);
-        console.log(`    search 실행 카운트: ${row.search_execution_count}회`);
-        console.log(`    총 goto 실행: ${row.total_goto_executions}회`);
-        console.log(`    총 search 실행: ${row.total_search_executions}회`);
-        console.log(`    총 goto 차단: ${row.total_goto_blocks}회`);
-        console.log(`    마지막 전환: ${row.last_mode_change || '없음'}`);
-        console.log('');
-      });
-    }
-    
-    // 전환 이력
-    const historyResult = await dbServiceV2.query(`
-      SELECT * FROM v2_search_mode_history ORDER BY switched_at DESC LIMIT 10
-    `);
-    
-    console.log('📋 최근 검색 모드 전환 이력 (10개):');
-    if (historyResult.rows.length === 0) {
-      console.log('  전환 이력이 없습니다.');
-    } else {
-      historyResult.rows.forEach(row => {
-        const date = new Date(row.switched_at).toLocaleString('ko-KR');
-        console.log(`  ${row.agent}: ${row.from_mode} → ${row.to_mode}`);
-        console.log(`    이유: ${row.switch_reason}`);
-        console.log(`    전환 전 차단: ${row.goto_blocks_before_switch}회`);
-        console.log(`    전환 전 search 실행: ${row.search_executions_before_switch}회`);
-        console.log(`    시간: ${date}\n`);
-      });
+      console.log('\n📍 현재 주로 GOTO 모드 사용 중');
     }
     
   } catch (error) {
-    console.error('에러:', error.message);
+    console.error('❌ 오류:', error.message);
   } finally {
     await dbServiceV2.close();
   }
