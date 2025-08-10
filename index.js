@@ -7,6 +7,7 @@ const { parseArgs, printHelp } = require('./lib/utils/cli-parser');
 const { runMultiMode } = require('./lib/runners/multi-mode');
 const { runApiMode } = require('./lib/runners/api-mode');
 const cleanupReports = require('./cleanup-reports');
+const UbuntuSetup = require('./lib/utils/ubuntu-setup');
 
 // 메인 실행 함수
 async function main() {
@@ -18,6 +19,16 @@ async function main() {
   }
 
   try {
+    // Ubuntu 환경에서 종속성 확인 (API 모드에서만, 빠른 확인)
+    if (process.platform === 'linux' && options.apiMode) {
+      console.log('🐧 Ubuntu 환경 감지 - Chrome 실행 환경 점검 중...');
+      const ubuntuCheck = await UbuntuSetup.checkSystemResources();
+      if (!ubuntuCheck.success) {
+        console.log('⚠️ Ubuntu 환경 설정 문제가 감지되었습니다. 전체 점검을 위해 다음 명령을 실행하세요:');
+        console.log('node -e "require(\'./lib/utils/ubuntu-setup\').checkAll()"');
+      }
+    }
+    
     // 자동 리포트 정리 (silent 모드)
     await cleanupReports(true);
     
