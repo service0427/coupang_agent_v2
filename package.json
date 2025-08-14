@@ -4,7 +4,7 @@
   "description": "쿠팡 Chrome 자동화 프로젝트",
   "main": "index.js",
   "scripts": {
-    "cleanup": "node cleanup-reports.js"
+    "install-playwright": "npx playwright install chromium"
   },
   "keywords": [
     "coupang",
@@ -16,7 +16,7 @@
   "license": "Private",
   "dependencies": {
     "axios": "^1.11.0",
-    "pg": "^8.11.3",
+    "pg": "^8.16.3",
     "playwright": "^1.40.0"
   }
 }

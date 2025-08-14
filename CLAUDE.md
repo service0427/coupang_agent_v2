@@ -20,11 +20,11 @@ node index.js --agent test1 --once
 # Run with continuous mode
 node index.js --agent test1
 
-# Run multiple concurrent instances (병렬 실행)
-node index.js --multi
+# Run API mode (connects to hub server)
+node index.js --api --instance 1 --threads 4
 
-# Run tests
-node tests/chrome-test.js
+# Clean up old reports
+npm run cleanup
 
 # Database management tools (Korean output)
 node tools/quick-check.js                    # Fast system health check
@@ -39,133 +39,133 @@ node tools/db-manager.js cleanup stuck       # Clean up stuck executions
 # Create V2 database tables (preferred)
 node tools/create-v2-tables.js
 
-# Legacy V1 setup
-scripts\create-db.bat
-node tools/create-db.js
-
 # Database migration tools
 node tools/migrate-to-keyword-mode-enum.js    # Apply ENUM migration
-node tools/setup-keyword-level-modes.js       # Setup keyword mode system
+node tools/run-full-migration.js              # Run complete migration
+```
+
+### Testing Commands
+```bash
+# Test Chrome path and browser launch
+node tools/test-chrome-path.js
+
+# Test blocking settings
+node tools/test-blocking-settings.js
+
+# Test traffic optimization
+node tools/traffic-optimization-test.js
 ```
 
 ## Architecture Overview
 
-### System Architecture (V2)
+### Dual-Architecture System
 
 The system operates on a **dual-architecture model**:
 - **V1 Legacy**: Original system for backward compatibility
 - **V2 Enhanced**: Advanced logging, keyword-level mode management, and network state tracking
 
+### Execution Modes
+
+1. **Database Mode** (Default): Reads keywords from PostgreSQL database
+   - Single agent: `--agent test1 --once`
+   - Continuous: `--agent test1`
+   
+2. **API Mode**: Connects to hub server for task distribution
+   - `--api --instance 1 --threads 4`
+   - Hub URL: `http://mkt.techb.kr:3001`
+   - Supports multi-threading and instance isolation
+
 ### Core Components
 
 1. **Entry Points**
-   - `index.js` - Unified execution file with V2 architecture support
-     - Single mode: `--agent test1 --once` (default)
-     - Continuous mode: `--agent test1` 
-     - Multi mode: `--multi` (parallel browser instances)
+   - `index.js` - Unified execution with automatic Ubuntu dependency checking for Linux environments
+   - Supports both database and API modes with different execution paths
 
 2. **Browser Automation Layer** (`lib/core/`)
    - `chrome-launcher.js` - Playwright Chrome instances with anti-detection
-   - `optimizer.js` - Database-controlled resource filtering (500KB target)
+   - `optimizer_db.js` - Database-controlled resource filtering (500KB target)
+   - `traffic-monitor.js` - Real-time traffic monitoring with `--monitor` flag
 
 3. **Business Logic** (`lib/handlers/`)
    - `coupang-handler.js` - Main automation logic with V2 logging integration
    - `cart-handler.js` - Shopping cart workflows
-   - `product-finder.js` - Product search and selection logic
-   - `search-mode-handler.js` - Manages dynamic search mode switching
+   - `product-finder-v2.js` - Enhanced product search with better error handling
+   - `search-mode-handler.js` - Dynamic search mode switching
+   - `smart-navigation-handler.js` - Intelligent navigation with retry logic
 
 4. **Service Layer** (`lib/services/`)
    - **V2 Services**:
-     - `db-service-v2.js` - Enhanced PostgreSQL integration with detailed logging
-     - `action-logger-v2.js` - State machine-based action tracking with database IDs
-     - `search-mode-manager.js` - Keyword-level mode management (goto ↔ search)
-   - **Legacy Services**:
-     - `db-service.js`, `proxy-manager.js`, `error-logger.js`
+     - `db-service-v2.js` - Enhanced PostgreSQL integration
+     - `action-logger-v2.js` - State machine-based action tracking
+     - `search-mode-manager-v2.js` - Advanced keyword mode management
+     - `hub-api-client.js` - Hub server communication for API mode
+   - **Execution Management**:
+     - `v2-execution-logger.js` - Session-based execution tracking
+     - `concurrent-block-detector.js` - Real-time blocking detection
+     - `global-block-detector.js` - System-wide block monitoring
 
 5. **Network Analysis** (`lib/network/`)
-   - `monitor.js` - Real-time CDP traffic monitoring
+   - `monitor.js` - CDP-based traffic monitoring
    - `analyzer.js` - Network analysis and reporting
    - `block-analyzer.js` - Resource blocking insights
 
-6. **Database Schema** (V2)
-   - `v2_test_keywords` - Keywords with ENUM-based mode management and blocking counters
-   - `v2_execution_logs` - Comprehensive execution tracking with session isolation
-   - `v2_error_logs` - Enhanced error logging with `action_id`, `network_state` tracking
-   - `v2_action_logs` - State machine action tracking with database integration
+### Database Schema (V2)
+
+- `v2_test_keywords` - Keywords with ENUM-based mode management
+- `v2_execution_logs` - Comprehensive execution tracking
+- `v2_error_logs` - Enhanced error logging with action_id, network_state
+- `v2_action_logs` - State machine action tracking
 
 ### Key Design Patterns
 
-- **V2 Error Logging**: Fixed data type mismatch with integer `action_id` and enhanced `network_state` collection
-- **Keyword-Level Mode Management**: Dynamic switching between `goto` and `search` modes based on blocking patterns
 - **Action State Machine**: V2 ActionLogger tracks complex workflows with database integration
-- **Anti-Detection**: Multiple bot avoidance techniques (user agent spoofing, WebDriver hiding, viewport randomization)
-- **Resource Optimization**: Database-controlled domain filtering with 500KB traffic targets
-- **Concurrent Execution**: Isolated browser instances with independent session management
-
-## V2 System Features
-
-### Search Mode Management
-- **Dynamic Mode Switching**: Automatic switching between `goto` (URL direct) and `search` (search input) modes
-- **Keyword-Level Tracking**: Each keyword maintains its own mode state with ENUM type safety
-- **Blocking Pattern Detection**: Automatically switches to search mode after 5 consecutive blocks
-- **Rotation System**: Returns to goto mode after 20 successful search executions
-
-### Enhanced Error Logging
-- **Action ID Integration**: Fixed data type mismatch between ActionLogger and database
-- **Network State Tracking**: Comprehensive network state collection for connection failures
-- **Session Isolation**: UUID-based session tracking with cross-reference capabilities
-- **Structured Error Data**: Categorized error types with actionable debugging information
-
-### Database Tools (`tools/` directory)
-The `tools/` directory now features a **unified management system** (Korean output):
-- **Main Tool**: `db-manager.js` - Unified interface replacing 80+ individual scripts
-- **Quick Check**: `quick-check.js` - Fast system health check for daily monitoring
-- **Core Tools**: Essential tools for V2 table management and migrations
-- **Legacy Archive**: `archive/legacy-scripts/` - Individual scripts preserved for reference
-
-**Time-saving approach**: Instead of creating new files for each database task, use the unified `db-manager.js` with category-based commands.
+- **Anti-Detection**: User agent spoofing, WebDriver hiding, viewport randomization
+- **Resource Optimization**: Database-controlled domain filtering targeting 500KB traffic
+- **Session Isolation**: UUID-based session tracking for concurrent execution
+- **Dynamic Mode Switching**: Automatic goto ↔ search mode based on blocking patterns
 
 ## Configuration
 
-Configuration is hardcoded in `config/environment.js` for single-user deployment:
-- Database connection: mkt.techb.kr:5432
-- Screen size: 1200x800  
+Configuration is hardcoded in `environment.js` (root directory):
+- Database: mkt.techb.kr:5432 (PostgreSQL)
+- Screen: 1200x800
 - Timeouts: 30s default, 60s navigation
+- Credentials are embedded for single-user deployment
 
-Proxy configuration is stored in `config/proxies.json` with support for multiple proxy types and authentication.
+## CLI Options
 
-## Testing Approach
-
-Tests are located in `tests/` directory. The main test file is `chrome-test.js` which validates:
-- Browser launch capabilities
-- Proxy functionality
-- Page navigation
-- Anti-detection effectiveness
-
-Run tests with: `node tests/chrome-test.js`
+```
+--agent <name>      Agent name (default: from environment.js)
+--once              Run once and exit
+--monitor           Enable real-time traffic monitoring logs
+--check-cookies     Track cookie changes
+--no-ip-change      Disable IP changes (testing)
+--api               Enable API mode
+--instance <n>      Instance number for API mode
+--threads <n>       Thread count for API mode
+```
 
 ## Development Guidelines
 
 ### V2 Error Logging
-- All V2 error logging must use `getCurrentActionDbId()` from ActionLoggerV2 to get integer action IDs
-- Network state should be collected for connection-related errors
-- Use `dbServiceV2.logErrorV2()` for enhanced error tracking with structured data
+- Use `getCurrentActionDbId()` from ActionLoggerV2 for integer action IDs
+- Collect network state for connection-related errors
+- Use `dbServiceV2.logErrorV2()` for structured error tracking
 
 ### Mode Management  
-- Use keyword-level mode management through `search-mode-manager.js`
-- Mode switching is automatic but can be manually controlled via database
-- Monitor mode effectiveness through analysis tools in `tools/` directory
+- Keyword-level mode management through `search-mode-manager-v2.js`
+- Automatic switching after 5 consecutive blocks
+- Returns to goto mode after 20 successful searches
 
-### Database Migrations
-- V2 system uses ENUM types for `current_mode` field for data integrity
-- Use migration tools in `tools/` directory for schema changes
-- Always backup before running migration scripts
+### Database Tools Strategy
+- Use unified `db-manager.js` instead of creating new scripts
+- Categories: check, analyze, cleanup, etc.
+- All output is in Korean for consistency
 
 ## Important Notes
 
 - All user-facing messages and comments are in Korean
-- The project interacts with Coupang's website, which may have anti-bot measures  
-- V2 system provides enhanced logging and keyword-level mode management
+- The project interacts with Coupang's website with anti-bot measures
 - Database is required for full functionality (PostgreSQL with V2 schema)
-- Proxy usage is recommended for production deployments
-- Use V2 tools for monitoring and analysis - they provide comprehensive insights into system performance
+- Ubuntu/Linux environments require Chrome dependencies (auto-checked in API mode)
+- Hub API client includes detailed error debugging with request/response logging

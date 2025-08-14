@@ -61,7 +61,6 @@ migrations/
 reports/
 
 # Configuration files with sensitive data
-environment.js
 config/proxies.json
 config/database.json
 
@@ -130,3 +129,16 @@ allowed-requests-*.txt
 
 # Package lock file (자동 생성됨)
 package-lock.json
+
+# MCP 설정 파일 (Claude Code 관련)
+.mcp.json
+
+# 개발 도구 스크립트들
+tools/convert-all-to-shared-cache.js
+
+# 설치 및 정리 관련
+INSTALL.md.bak
+scripts/cleanup-browser-data.sh.bak
+
+# 백업 폴더 (개발 도구 및 분석 파일들)
+backup/
