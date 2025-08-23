@@ -3,7 +3,7 @@
  */
 
 const { parseArgs, printHelp } = require('./lib/utils/cli-parser');
-const { runApiMode } = require('./lib/runners/api-mode');
+const { runApiMode } = require('./lib/core/api-mode');
 const UbuntuSetup = require('./lib/utils/ubuntu-setup');
 
 // 메인 실행 함수
@@ -26,14 +26,12 @@ async function main() {
       }
     }
     
-    let exitCode = 0;
-    
     // API 모드로만 실행
     console.log(`🚀 API 모드 실행 시작\n`);
     await runApiMode(options);
     
     console.log('\n👋 프로그램 종료');
-    process.exit(exitCode);
+    process.exit(0);
     
   } catch (error) {
     console.error('\n❌ 프로그램 오류:', error.message);
@@ -45,5 +43,3 @@ async function main() {
 if (require.main === module) {
   main().catch(console.error);
 }
-
-module.exports = { main };
