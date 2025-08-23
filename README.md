@@ -1,86 +1,64 @@
-# Coupang Agent v1
+# Coupang Agent V2
 
-쿠팡 상품 자동화 도구 - Node.js와 Playwright 기반의 브라우저 자동화 시스템 (API 모드 전용)
+쿠팡 자동화 도구 V2 - 완전히 리팩토링된 최적화 버전
 
-## 주요 기능
+## 특징
 
-- **상품 검색 및 클릭**: 특정 상품 코드를 검색하여 자동 클릭
-- **API 모드**: 허브 서버와 연동하여 작업 분산 처리
-- **프록시 지원**: SOCKS5 프록시 자동 토글 및 IP 변경
-- **차단 감지**: 쿠팡 접속 차단 자동 감지 및 우회
-- **멀티쓰레드**: 여러 인스턴스 동시 실행 지원
-- **장바구니 클릭**: 상품 페이지에서 장바구니 추가 자동화
-- **SSL/TLS 차단 감지**: HTTPS 연결 문제 자동 감지
+- **경량화**: 파일 수 77% 감소 (71개 → 16개)
+- **모듈화**: 클래스 기반 상속 구조
+- **최적화**: 불필요한 기능 제거, 성능 개선
+- **안정성**: Headless 모드 차단으로 TLS 오류 방지
 
-## 설치 방법
+## 설치
 
 ```bash
 # 의존성 설치
 npm install
-
-# Playwright 브라우저 설치
 npx playwright install chromium
+
+# Chrome 의존성 (Ubuntu)
+sudo apt-get update
+sudo apt-get install -y \
+  libnss3 libnspr4 libatk1.0-0 libatk-bridge2.0-0 \
+  libcups2 libdrm2 libxkbcommon0 libxcomposite1 \
+  libxdamage1 libxrandr2 libgbm1 libpango-1.0-0 \
+  libcairo2 libasound2
 ```
 
-## 실행 방법
-
-### API 모드
-허브 서버(mkt.techb.kr:3001)와 연동하여 작업 분산
+## 실행
 
 ```bash
-# API 모드 실행 (4개 쓰레드)
-node index.js --api --instance 1 --threads 4
-
-# 단일 실행 후 종료
-node index.js --api --instance 1 --threads 4 --once
-
-# 모니터링과 함께
-node index.js --api --instance 1 --threads 4 --monitor
+# API 모드 실행
+node index.js --threads 4          # 연속 실행
+node index.js --threads 4 --once   # 1회 실행
 ```
 
-## CLI 옵션
+## 구조
 
 ```
---api               API 모드 활성화 (필수)
---instance <번호>   인스턴스 번호 (기본값: 1)
---threads <개수>    쓰레드 개수 (기본값: 4)
---once              1회만 실행 후 종료
---monitor           실시간 트래픽 모니터링 로그 활성화
---check-cookies     쿠키 변화 추적
---no-ip-change      IP 변경 비활성화 (테스트용)
+lib/
+├── core/           # 핵심 로직
+├── modules/        # 비즈니스 로직  
+└── utils/          # 유틸리티
 ```
 
-## 시스템 요구사항
+## 주요 개선사항
 
-- Node.js v16.0.0 이상
-- Ubuntu 20.04+ (Linux 권장)
-- 메모리: 최소 4GB RAM (멀티쓰레드 시 8GB 권장)
-- 안정적인 인터넷 연결
+### V1 → V2 변경점
 
-## 설정
+1. **구조 단순화**
+   - 8개 폴더 → 3개 폴더
+   - 복잡한 의존성 제거
 
-- 허브 서버: mkt.techb.kr:3001 (고정)
-- 화면 해상도: 1200x800
-- 타임아웃: 30초 (기본), 60초 (네비게이션)
-- 설정은 `environment.js`에서 관리
+2. **코드 최적화**
+   - BrowserCore 클래스로 브라우저 관리 통합
+   - 중복 코드 제거
+   - Chrome 인자 최소화 (2개만 사용)
 
-## 브라우저 인스턴스
+3. **기능 정리**
+   - 사용하지 않는 쿠키/네트워크 모니터링 제거
+   - 필수 기능만 유지
 
-API 모드에서는 쓰레드별 독립된 브라우저 인스턴스를 사용:
-- `/browser-data/instance1/` - 쓰레드 1
-- `/browser-data/instance2/` - 쓰레드 2
-- `/browser-data/instance3/` - 쓰레드 3
-- `/browser-data/instance4/` - 쓰레드 4
+## 라이센스
 
-## 캐시 공유 시스템
-
-- `browser-data/shared-cache/` - 모든 인스턴스가 공유하는 캐시
-- 트래픽 절약 및 성능 향상
-- 자동 심볼릭 링크 관리
-
-## 주의사항
-
-- Ubuntu/Linux 환경에서 Chrome 의존성 자동 확인
-- 헤드리스 모드 미지원 (항상 GUI 모드)
-- 프록시 설정은 허브 서버에서 자동 관리
-- SSL/TLS 초기화 문제 자동 처리
+Private
