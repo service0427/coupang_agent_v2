@@ -123,11 +123,22 @@ case "$1" in
         ;;
 
     all)
-        echo -e "${GREEN}Chrome 설치 시작${NC}"
-        echo -e "${YELLOW}참고: 구버전은 다운로드 불가능할 수 있어 최신 버전을 설치합니다${NC}"
+        echo -e "${GREEN}Chrome 모든 버전 설치 시작${NC}"
+        echo -e "${YELLOW}참고: 구버전은 다운로드 불가능할 수 있어 최신 버전으로 대체됩니다${NC}"
         echo
 
-        # 최신 Chrome 설치
+        # 모든 버전 설치 시도
+        for version in $(echo "${!CHROME_VERSIONS[@]}" | tr ' ' '\n' | sort -n); do
+            echo
+            echo -e "${CYAN}Chrome $version 설치 시도...${NC}"
+
+            # 버전별 설치 함수 호출
+            install_chrome "$version" "${CHROME_VERSIONS[$version]}"
+        done
+
+        echo
+
+        # 추가로 최신 Chrome도 설치
         echo -e "${BLUE}최신 Chrome 설치 중...${NC}"
         CHROME_URL="https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb"
         DEB_FILE="/tmp/chrome-current.deb"
@@ -178,7 +189,7 @@ case "$1" in
         fi
 
         echo
-        echo -e "${GREEN}설치 완료!${NC}"
+        echo -e "${GREEN}모든 설치 작업 완료!${NC}"
         ;;
 
     [0-9]*)
