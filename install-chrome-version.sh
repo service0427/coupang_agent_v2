@@ -20,14 +20,16 @@ show_usage() {
     echo -e "${GREEN}Chrome 버전 설치 스크립트${NC}"
     echo
     echo "사용법:"
-    echo "  $0 <버전>    # 특정 버전 설치"
-    echo "  $0 all       # 모든 버전 설치 (128-140)"
-    echo "  $0 list      # 설치 가능한 버전 목록"
+    echo "  $0 <버전>      # 특정 빌드 버전 설치 (예: 140.207)"
+    echo "  $0 major <숫자> # 메이저 버전의 모든 빌드 설치 (예: major 140)"
+    echo "  $0 all         # 모든 버전 설치 (128-140 전체)"
+    echo "  $0 list        # 설치 가능한 버전 목록"
+    echo "  $0 latest      # 최신 Chrome만 설치"
     echo
     echo "예시:"
-    echo "  $0 128       # Chrome 128 설치"
-    echo "  $0 130       # Chrome 130 설치"
-    echo "  $0 138       # Chrome 138 설치"
+    echo "  $0 140.207     # Chrome 140.0.7339.207 설치"
+    echo "  $0 major 140   # Chrome 140의 모든 빌드 설치"
+    echo "  $0 all         # 모든 Chrome 버전 설치"
     echo
     echo "설치된 Chrome 버전 확인:"
     echo "  ls -la ~/chrome-versions/"
@@ -92,21 +94,74 @@ install_chrome() {
     fi
 }
 
-# 설치 가능한 버전 목록
+# 설치 가능한 버전 목록 (빌드 번호별 세부 버전 포함)
 declare -A CHROME_VERSIONS=(
-    ["128"]="128.0.6613.137"
-    ["129"]="129.0.6668.89"
-    ["130"]="130.0.6723.116"
-    ["131"]="131.0.6778.264"
-    ["132"]="132.0.6834.159"
-    ["133"]="133.0.6943.141"
-    ["134"]="134.0.6998.165"
-    ["135"]="135.0.7049.114"
-    ["136"]="136.0.7103.113"
-    ["137"]="137.0.7151.119"
-    ["138"]="138.0.7204.183"
-    ["139"]="139.0.7258.154"
-    ["140"]="140.0.7339.185"
+    # Chrome 128 버전들
+    ["128.84"]="128.0.6613.84"
+    ["128.113"]="128.0.6613.113"
+    ["128.119"]="128.0.6613.119"
+    ["128.137"]="128.0.6613.137"
+
+    # Chrome 129 버전들
+    ["129.58"]="129.0.6668.58"
+    ["129.70"]="129.0.6668.70"
+    ["129.89"]="129.0.6668.89"
+    ["129.100"]="129.0.6668.100"
+
+    # Chrome 130 버전들
+    ["130.58"]="130.0.6723.58"
+    ["130.69"]="130.0.6723.69"
+    ["130.91"]="130.0.6723.91"
+    ["130.116"]="130.0.6723.116"
+
+    # Chrome 131 버전들
+    ["131.85"]="131.0.6778.85"
+    ["131.108"]="131.0.6778.108"
+    ["131.139"]="131.0.6778.139"
+    ["131.204"]="131.0.6778.204"
+    ["131.264"]="131.0.6778.264"
+
+    # Chrome 132 버전들
+    ["132.83"]="132.0.6834.83"
+    ["132.110"]="132.0.6834.110"
+    ["132.159"]="132.0.6834.159"
+
+    # Chrome 133 버전들
+    ["133.98"]="133.0.6943.98"
+    ["133.116"]="133.0.6943.116"
+    ["133.141"]="133.0.6943.141"
+
+    # Chrome 134 버전들
+    ["134.117"]="134.0.6998.117"
+    ["134.137"]="134.0.6998.137"
+    ["134.165"]="134.0.6998.165"
+
+    # Chrome 135 버전들
+    ["135.95"]="135.0.7049.95"
+    ["135.114"]="135.0.7049.114"
+
+    # Chrome 136 버전들
+    ["136.92"]="136.0.7103.92"
+    ["136.113"]="136.0.7103.113"
+
+    # Chrome 137 버전들
+    ["137.95"]="137.0.7151.95"
+    ["137.119"]="137.0.7151.119"
+
+    # Chrome 138 버전들
+    ["138.49"]="138.0.7204.49"
+    ["138.100"]="138.0.7204.100"
+    ["138.183"]="138.0.7204.183"
+
+    # Chrome 139 버전들
+    ["139.105"]="139.0.7258.105"
+    ["139.135"]="139.0.7258.135"
+    ["139.154"]="139.0.7258.154"
+
+    # Chrome 140 버전들
+    ["140.111"]="140.0.7339.111"
+    ["140.185"]="140.0.7339.185"
+    ["140.207"]="140.0.7339.207"
 )
 
 # 메인 처리
@@ -117,9 +172,73 @@ fi
 case "$1" in
     list)
         echo -e "${CYAN}설치 가능한 Chrome 버전:${NC}"
-        for version in $(echo "${!CHROME_VERSIONS[@]}" | tr ' ' '\n' | sort -n); do
+        for version in $(echo "${!CHROME_VERSIONS[@]}" | tr ' ' '\n' | sort -V); do
             echo "  Chrome $version: ${CHROME_VERSIONS[$version]}"
         done
+        ;;
+
+    major)
+        if [ -z "$2" ]; then
+            echo -e "${RED}메이저 버전 번호를 지정해주세요${NC}"
+            echo "예: $0 major 140"
+            exit 1
+        fi
+        MAJOR=$2
+        echo -e "${GREEN}Chrome $MAJOR 메이저 버전의 모든 빌드 설치 시작${NC}"
+        echo
+
+        COUNT=0
+        for version in $(echo "${!CHROME_VERSIONS[@]}" | tr ' ' '\n' | sort -V); do
+            if [[ $version == $MAJOR.* ]]; then
+                echo -e "${CYAN}Chrome ${CHROME_VERSIONS[$version]} 설치 시도...${NC}"
+                install_chrome "$version" "${CHROME_VERSIONS[$version]}"
+                ((COUNT++))
+                echo
+            fi
+        done
+
+        if [ $COUNT -eq 0 ]; then
+            echo -e "${YELLOW}Chrome $MAJOR 버전을 찾을 수 없습니다${NC}"
+        else
+            echo -e "${GREEN}Chrome $MAJOR 메이저 버전 설치 완료 (총 $COUNT개)${NC}"
+        fi
+        ;;
+
+    latest)
+        echo -e "${GREEN}최신 Chrome 설치${NC}"
+        CHROME_URL="https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb"
+        DEB_FILE="/tmp/chrome-latest.deb"
+
+        echo "  다운로드: $CHROME_URL"
+        if wget -q -O "$DEB_FILE" "$CHROME_URL"; then
+            TEMP_DIR="/tmp/chrome-temp-$$"
+            mkdir -p "$TEMP_DIR"
+            cd "$TEMP_DIR"
+            ar x "$DEB_FILE"
+            tar -xf control.tar.* ./control 2>/dev/null
+
+            VERSION=$(grep "^Version:" control | awk '{print $2}' | cut -d'-' -f1)
+            EXTRACT_DIR="$CHROME_BASE_DIR/chrome-${VERSION//./-}"
+
+            if [ ! -d "$EXTRACT_DIR" ]; then
+                mkdir -p "$EXTRACT_DIR"
+                cd "$EXTRACT_DIR"
+                ar x "$DEB_FILE"
+                tar -xf data.tar.*
+                rm -f control.tar.* data.tar.* debian-binary
+                echo "$VERSION" > "$EXTRACT_DIR/VERSION"
+
+                echo -e "${GREEN}✓ Chrome $VERSION 설치 완료${NC}"
+                echo "  경로: $EXTRACT_DIR"
+            else
+                echo -e "${YELLOW}Chrome $VERSION은 이미 설치되어 있습니다${NC}"
+            fi
+
+            rm -rf "$TEMP_DIR"
+            rm -f "$DEB_FILE"
+        else
+            echo -e "${RED}Chrome 다운로드 실패${NC}"
+        fi
         ;;
 
     all)
@@ -193,16 +312,24 @@ case "$1" in
         ;;
 
     [0-9]*)
+        # 숫자로 시작하는 버전 (예: 140.207, 138.183 등)
         if [ -z "${CHROME_VERSIONS[$1]}" ]; then
             echo -e "${RED}지원하지 않는 버전: Chrome $1${NC}"
-            echo "설치 가능한 버전: ${!CHROME_VERSIONS[@]}"
+            echo
+            echo "설치 가능한 버전 확인: $0 list"
+            echo "메이저 버전별 설치: $0 major <숫자>"
             exit 1
         fi
         install_chrome "$1" "${CHROME_VERSIONS[$1]}"
         ;;
 
     *)
-        show_usage
+        # 그 외의 경우 버전 키로 직접 시도
+        if [ ! -z "${CHROME_VERSIONS[$1]}" ]; then
+            install_chrome "$1" "${CHROME_VERSIONS[$1]}"
+        else
+            show_usage
+        fi
         ;;
 esac
 
