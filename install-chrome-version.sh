@@ -129,26 +129,26 @@ case "$1" in
 
         # 최신 Chrome 설치
         echo -e "${BLUE}최신 Chrome 설치 중...${NC}"
-        local CHROME_URL="https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb"
-        local DEB_FILE="/tmp/chrome-current.deb"
+        CHROME_URL="https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb"
+        DEB_FILE="/tmp/chrome-current.deb"
 
         echo "  다운로드: $CHROME_URL"
         if wget -q -O "$DEB_FILE" "$CHROME_URL"; then
             # 버전 추출을 위한 임시 압축 해제
-            local TEMP_DIR="/tmp/chrome-temp-$$"
+            TEMP_DIR="/tmp/chrome-temp-$$"
             mkdir -p "$TEMP_DIR"
             cd "$TEMP_DIR"
             ar x "$DEB_FILE"
             tar -xf control.tar.* ./control 2>/dev/null || tar -xf control.tar.* control 2>/dev/null
 
             # 버전 정보 추출
-            local VERSION=$(grep "^Version:" control | awk '{print $2}' | cut -d'-' -f1)
-            local MAJOR_VERSION=$(echo $VERSION | cut -d. -f1)
+            VERSION=$(grep "^Version:" control | awk '{print $2}' | cut -d'-' -f1)
+            MAJOR_VERSION=$(echo $VERSION | cut -d. -f1)
 
             echo -e "${CYAN}  감지된 버전: Chrome $VERSION (메이저: $MAJOR_VERSION)${NC}"
 
             # 실제 설치
-            local EXTRACT_DIR="$CHROME_BASE_DIR/chrome-${VERSION//./-}"
+            EXTRACT_DIR="$CHROME_BASE_DIR/chrome-${VERSION//./-}"
 
             if [ ! -d "$EXTRACT_DIR" ]; then
                 mkdir -p "$EXTRACT_DIR"
