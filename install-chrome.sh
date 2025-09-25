@@ -48,8 +48,8 @@ install_chrome() {
 
     # Chrome 다운로드 및 설치 (구버전은 실패할 수 있으므로 current URL도 시도)
     local CHROME_URL="https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_${BUILD}_amd64.deb"
-    local DEB_FILE="/tmp/chrome-${VERSION}.deb"
-    local EXTRACT_DIR="$CHROME_BASE_DIR/chrome-${VERSION//./-}"
+    local DEB_FILE="/tmp/chrome-${BUILD}.deb"
+    local EXTRACT_DIR="$CHROME_BASE_DIR/chrome-${BUILD//./-}"
 
     # 이미 설치되어 있는지 확인
     if [ -d "$EXTRACT_DIR" ] && [ -f "$EXTRACT_DIR/opt/google/chrome/chrome" ]; then
