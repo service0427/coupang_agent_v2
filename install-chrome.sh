@@ -17,22 +17,16 @@ NC='\033[0m'
 
 # 사용법 출력
 show_usage() {
-    echo -e "${GREEN}Chrome 버전 설치 스크립트${NC}"
+    echo -e "${GREEN}Chrome 설치 스크립트${NC}"
     echo
     echo "사용법:"
-    echo "  $0 <버전>      # 특정 빌드 버전 설치 (예: 140.207)"
-    echo "  $0 major <숫자> # 메이저 버전의 모든 빌드 설치 (예: major 140)"
-    echo "  $0 all         # 모든 버전 설치 (128-140 전체)"
-    echo "  $0 list        # 설치 가능한 버전 목록"
-    echo "  $0 latest      # 최신 Chrome만 설치"
+    echo "  $0           # 모든 버전 설치"
+    echo "  $0 list      # 설치 현황 확인"
     echo
-    echo "예시:"
-    echo "  $0 140.207     # Chrome 140.0.7339.207 설치"
-    echo "  $0 major 140   # Chrome 140의 모든 빌드 설치"
-    echo "  $0 all         # 모든 Chrome 버전 설치"
+    echo "선택적 옵션:"
+    echo "  $0 <버전>    # 특정 버전 설치 (예: 140.207)"
+    echo "  $0 latest    # 최신 Chrome만 설치"
     echo
-    echo "설치된 Chrome 버전 확인:"
-    echo "  ls -la ~/chrome-versions/"
     exit 0
 }
 
@@ -166,15 +160,60 @@ declare -A CHROME_VERSIONS=(
 
 # 메인 처리
 if [ $# -eq 0 ]; then
-    show_usage
+    # 인수 없이 실행하면 모든 버전 설치
+    ACTION="all"
+else
+    ACTION="$1"
 fi
 
-case "$1" in
+case "$ACTION" in
     list)
-        echo -e "${CYAN}설치 가능한 Chrome 버전:${NC}"
+        echo -e "${CYAN}=== Chrome 버전 현황 ===${NC}"
+        echo
+
+        # 설치된 버전 확인
+        echo -e "${GREEN}✓ 설치된 버전:${NC}"
+        if [ -d "$CHROME_BASE_DIR" ]; then
+            installed_count=0
+            for dir in $(ls -d $CHROME_BASE_DIR/chrome-* 2>/dev/null | sort -V); do
+                if [ -f "$dir/opt/google/chrome/chrome" ]; then
+                    dirname=$(basename "$dir")
+                    version_file="$dir/VERSION"
+                    if [ -f "$version_file" ]; then
+                        version=$(cat "$version_file")
+                        echo "  - $dirname (버전: $version)"
+                    else
+                        echo "  - $dirname"
+                    fi
+                    ((installed_count++))
+                fi
+            done
+            echo -e "${CYAN}  총 ${installed_count}개 설치됨${NC}"
+        else
+            echo "  설치된 버전 없음"
+        fi
+
+        echo
+
+        # 설치 가능한 버전 확인
+        echo -e "${YELLOW}○ 설치 가능한 버전 (미설치):${NC}"
+        not_installed_count=0
         for version in $(echo "${!CHROME_VERSIONS[@]}" | tr ' ' '\n' | sort -V); do
-            echo "  Chrome $version: ${CHROME_VERSIONS[$version]}"
+            build="${CHROME_VERSIONS[$version]}"
+            check_dir="$CHROME_BASE_DIR/chrome-${build//./-}"
+            if [ ! -d "$check_dir" ] || [ ! -f "$check_dir/opt/google/chrome/chrome" ]; then
+                echo "  - Chrome $version: $build"
+                ((not_installed_count++))
+            fi
         done
+
+        if [ $not_installed_count -eq 0 ]; then
+            echo -e "${GREEN}  모든 버전이 설치되어 있습니다!${NC}"
+        else
+            echo -e "${YELLOW}  ${not_installed_count}개 버전 추가 설치 가능${NC}"
+            echo
+            echo -e "${CYAN}설치 방법: ./install-chrome.sh${NC}"
+        fi
         ;;
 
     major)
@@ -334,8 +373,4 @@ case "$1" in
 esac
 
 echo
-echo -e "${CYAN}설치 완료 후 사용법:${NC}"
-echo "  node index.js --threads 1 --once"
-echo
-echo -e "${CYAN}설치된 버전 확인:${NC}"
-echo "  ls -la ~/chrome-versions/"
+echo -e "${GREEN}완료!${NC} 설치 현황 확인: ./install-chrome.sh list"
