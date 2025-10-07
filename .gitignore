@@ -141,4 +141,4 @@ INSTALL.md.bak
 scripts/cleanup-browser-data.sh.bak
 
 # 백업 폴더 (개발 도구 및 분석 파일들)
-backup/
+backup/*.tar.xz
