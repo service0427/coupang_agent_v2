@@ -21,8 +21,8 @@ node index.js --threads 4           # Continuous mode
 ## Architecture
 
 ### API Mode Only
-- Connects to hub server: `http://mkt.techb.kr:3001`
-- Multi-threading support
+- Connects to hub server: `http://61.84.75.37:3302`
+- Multi-threading support (default: 4 threads)
 - Task distribution from hub
 
 ### Core Components
@@ -31,26 +31,35 @@ node index.js --threads 4           # Continuous mode
    - `index.js` - API mode execution
 
 2. **Core** (`lib/core/`)
-   - `chrome-launcher.js` - Playwright Chrome with anti-detection
+   - `api-mode.js` - API mode runner (multi-threading)
+   - `browser-core.js` - Playwright Chrome with anti-detection
    - `search-executor.js` - Main search execution
    - `optimizer.js` - Resource optimization
+   - `api/` - API mode helper modules
+     - `chrome-manager.js` - Chrome version management
+     - `error-handler.js` - Error handling with searchMode logic
+     - `result-builder.js` - Success response building
 
-3. **Handlers** (`lib/handlers/`)
-   - `coupang-handler.js` - Main automation logic
-   - `product-finder.js` - Product search
-   - `cart-handler.js` - Cart handling
-   - `pagination-handler.js` - Page navigation
-   - `search-mode-handler.js` - Search mode switching
+3. **Modules** (`lib/modules/`)
+   - `coupang-handler.js` - Re-export layer for backward compatibility
+   - `api-service.js` - Hub API client
+   - `browser-service.js` - Browser lifecycle management
+   - `product-detail-handler.js` - Product detail extraction
+   - `product/` - Product handling modules
+     - `product-list-extractor.js` - Extract product lists from search results
+     - `product-click-handler.js` - Find and click target products
+     - `cart-handler.js` - Shopping cart operations
+   - `search/` - Search handling modules
+     - `search-executor.js` - Main search workflow orchestration
+     - `search-mode-handler.js` - Search mode switching (main/direct)
+     - `pagination-handler.js` - Page navigation with retry logic
 
-4. **Services** (`lib/services/`)
-   - `hub-api-client.js` - Hub server communication
-   - `browser-manager.js` - Browser lifecycle
-   - `shared-cache-manager.js` - Cache management
-
-5. **Utilities** (`lib/utils/`)
-   - Browser helpers
-   - Session management
-   - Window positioning
+4. **Utilities** (`lib/utils/`)
+   - `browser-helpers.js` - Browser utility functions
+   - `cli-parser.js` - CLI argument parsing
+   - `common-helpers.js` - Common helper functions
+   - `human-click.js` - Human-like click simulation
+   - `ubuntu-setup.js` - Ubuntu-specific setup
 
 ## Configuration
 
@@ -62,10 +71,13 @@ node index.js --threads 4           # Continuous mode
 
 ```
 --threads <n>       Thread count (default: 4)
---once             Run once and exit
---monitor          Enable traffic monitoring
---check-cookies    Track cookie changes
---keep-browser     Keep browser open on error
+--once              Run once and exit
+--keep-browser      Keep browser open on error
+--no-gpu            Disable GPU hardware acceleration
+--proxy <proxy>     Force proxy (format: host:port:user:pass)
+--chrome <version>  Chrome version selection (e.g., 138, 140, 138.0.7204.49)
+--direct-url        Direct to search results page (skip main page)
+--help              Show help
 ```
 
 ## ⚠️⚠️⚠️ ABSOLUTE RULES - NEVER BREAK ⚠️⚠️⚠️

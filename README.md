@@ -4,8 +4,8 @@
 
 ## 특징
 
-- **경량화**: 파일 수 77% 감소 (71개 → 16개)
-- **모듈화**: 클래스 기반 상속 구조
+- **경량화**: 파일 수 67% 감소 (71개 → 23개)
+- **모듈화**: 단일 책임 원칙 기반 모듈 분리
 - **최적화**: 불필요한 기능 제거, 성능 개선
 - **안정성**: Headless 모드 차단으로 TLS 오류 방지
 
@@ -37,9 +37,25 @@ node index.js --threads 4 --once   # 1회 실행
 
 ```
 lib/
-├── core/           # 핵심 로직
-├── modules/        # 비즈니스 로직  
-└── utils/          # 유틸리티
+├── core/                    # 핵심 로직
+│   ├── api-mode.js         # API 모드 멀티쓰레드 실행
+│   ├── browser-core.js     # 브라우저 관리
+│   ├── search-executor.js  # 검색 실행
+│   ├── optimizer.js        # 트래픽 최적화
+│   └── api/                # API 모드 헬퍼
+│       ├── chrome-manager.js
+│       ├── error-handler.js
+│       └── result-builder.js
+├── modules/                 # 비즈니스 로직
+│   ├── api-service.js      # 허브 API 클라이언트
+│   ├── browser-service.js  # 브라우저 서비스
+│   ├── coupang-handler.js  # 재수출 레이어
+│   ├── product/            # 상품 처리
+│   └── search/             # 검색 처리
+└── utils/                   # 유틸리티
+    ├── browser-helpers.js
+    ├── cli-parser.js
+    └── ...
 ```
 
 ## 주요 개선사항
