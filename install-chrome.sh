@@ -212,7 +212,7 @@ case "$ACTION" in
         echo -e "${CYAN}=== Chrome 버전 현황 ===${NC}"
         echo
 
-        # 설치된 버전 확인
+        # 설치된 버전 확인ㄴㄴ
         echo -e "${GREEN}✓ 설치된 버전:${NC}"
         if [ -d "$CHROME_BASE_DIR" ]; then
             installed_count=0
