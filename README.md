@@ -11,12 +11,20 @@
 
 ## 설치
 
-```bash
-# 의존성 설치
-npm install
-npx playwright install chromium
+### 자동 설치 (권장)
 
-# Chrome 의존성 (Ubuntu)
+```bash
+# 모든 의존성 자동 설치 (Ubuntu/Debian)
+./install.sh
+```
+
+### 수동 설치
+
+```bash
+# 1. Node.js 패키지 설치 (Playwright 자동 포함)
+npm install
+
+# 2. Chrome 시스템 의존성 (Ubuntu/Debian)
 sudo apt-get update
 sudo apt-get install -y \
   libnss3 libnspr4 libatk1.0-0 libatk-bridge2.0-0 \
@@ -24,6 +32,8 @@ sudo apt-get install -y \
   libxdamage1 libxrandr2 libgbm1 libpango-1.0-0 \
   libcairo2 libasound2
 ```
+
+**참고**: `npm install` 실행 시 `postinstall` 스크립트가 자동으로 Playwright Chromium을 설치합니다.
 
 ## 실행
 
