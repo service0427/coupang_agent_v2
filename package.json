@@ -4,8 +4,8 @@
   "description": "쿠팡 Chrome 자동화 프로젝트",
   "main": "index.js",
   "scripts": {
-    "postinstall": "npx playwright install chromium",
-    "install-playwright": "npx playwright install chromium"
+    "postinstall": "npx patchright install chromium",
+    "install-playwright": "npx patchright install chromium"
   },
   "keywords": [
     "coupang",

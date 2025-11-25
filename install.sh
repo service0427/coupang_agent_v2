@@ -59,8 +59,8 @@ if command -v apt-get &> /dev/null; then
     echo ""
 fi
 
-# 3. npm 패키지 설치 (postinstall로 Playwright도 자동 설치됨)
-echo "3️⃣ npm 패키지 설치 중 (Playwright 포함)..."
+# 3. npm 패키지 설치 (postinstall로 Patchright Chromium 자동 설치됨)
+echo "3️⃣ npm 패키지 설치 중 (Patchright Chromium 포함)..."
 npm install
 echo "✅ 패키지 설치 완료"
 echo ""
@@ -72,7 +72,7 @@ if [ -d "node_modules" ]; then
 fi
 
 if [ -d "$HOME/.cache/ms-playwright" ] || [ -d "$HOME/Library/Caches/ms-playwright" ]; then
-    echo "✅ Playwright 브라우저 바이너리 확인"
+    echo "✅ Patchright 브라우저 바이너리 확인"
 fi
 
 echo ""

@@ -21,7 +21,7 @@
 ### 수동 설치
 
 ```bash
-# 1. Node.js 패키지 설치 (Playwright 자동 포함)
+# 1. Node.js 패키지 설치 (Patchright Chromium 자동 포함)
 npm install
 
 # 2. Chrome 시스템 의존성 (Ubuntu/Debian)
@@ -33,7 +33,9 @@ sudo apt-get install -y \
   libcairo2 libasound2
 ```
 
-**참고**: `npm install` 실행 시 `postinstall` 스크립트가 자동으로 Playwright Chromium을 설치합니다.
+**참고**:
+- `npm install` 실행 시 `postinstall` 스크립트가 자동으로 **Patchright Chromium**을 설치합니다
+- Patchright는 안티봇 감지 우회를 위한 Playwright 패치 버전입니다
 
 ## 실행
 
