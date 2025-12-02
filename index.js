@@ -1,5 +1,28 @@
 /**
  * 쿠팡 Chrome 자동화 통합 실행 파일
+ *
+ * 사용법:
+ *   node index.js [옵션]
+ *
+ * 옵션:
+ *   --threads <n>       쓰레드 수 (기본: 4)
+ *   --once              1회만 실행 후 종료
+ *   --keep-browser      에러 시 브라우저 유지 (디버깅용)
+ *   --no-gpu            GPU 비활성화
+ *   --proxy <proxy>     프록시 강제 지정 (host:port:user:pass)
+ *   --chrome <version>  Chrome 버전 지정 (예: 138, 140)
+ *   --direct-url        검색 결과 페이지로 직접 이동
+ *   --help              도움말 표시
+ *
+ * 예시:
+ *   node index.js --threads 4              # 4개 쓰레드로 연속 실행
+ *   node index.js --threads 1 --once       # 1회 실행 후 종료
+ *   node index.js --threads 2 --keep-browser  # 디버깅 모드
+ *
+ * 로그 저장:
+ *   node index.js --threads 4 >> logs/output.log 2>&1
+ *   node index.js --threads 4 2>&1 | tee logs/output.log  # 실시간 확인 + 저장
+ *   node index.js --threads 4 2>&1 | tee "logs/$(date +%Y%m%d_%H%M%S).log"  # 날짜별 저장
  */
 
 const { parseArgs, printHelp } = require('./lib/utils/cli-parser');
