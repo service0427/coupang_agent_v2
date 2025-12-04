@@ -142,3 +142,18 @@ scripts/cleanup-browser-data.sh.bak
 
 # 백업 폴더 (개발 도구 및 분석 파일들)
 backup/*.tar.xz
+
+# HAR 파일 (네트워크 분석용)
+*.har
+
+# 테스트 분석 폴더
+test-analysis/
+
+# 문서 폴더 (개발 서버에서만 참고)
+docs/
+
+# 개발용 쉘 스크립트 (install.sh, install-chrome.sh는 배포 필요)
+clean-shared-cache.sh
+
+# Claude Code 참고 문서 (개발 서버 전용)
+CLAUDE.md

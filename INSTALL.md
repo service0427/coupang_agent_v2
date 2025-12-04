@@ -1,12 +1,13 @@
-# 쿠팡 에이전트 설치 가이드
+# 쿠팡 에이전트 V2 설치 가이드
 
 ## 시스템 요구사항
 
-- **운영체제**: Ubuntu 20.04+ (Linux 권장)
-- **Node.js**: v16.0.0 이상
+- **운영체제**: Ubuntu 20.04+ (Linux 권장, GUI 모드 필수)
+- **Node.js**: v18.0.0 이상
 - **메모리**: 최소 4GB RAM (멀티쓰레드 사용 시 8GB 권장)
-- **디스크**: 최소 10GB 여유 공간
+- **디스크**: 최소 10GB 여유 공간 (Chrome 버전별 설치 시 추가 필요)
 - **네트워크**: 안정적인 인터넷 연결
+- **디스플레이**: X11 환경 필수 (headless 모드 사용 불가)
 
 ## 1. Node.js 설치
 
@@ -76,17 +77,14 @@ sudo apt install -y git
 
 ```bash
 # 프로젝트 클론
-git clone <repository-url> coupang_agent_v1
-cd coupang_agent_v1
+git clone <repository-url> coupang_agent_v2
+cd coupang_agent_v2
 
-# Node.js 의존성 설치
+# Node.js 의존성 설치 (Patchright Chromium 자동 설치 포함)
 npm install
 
-# Playwright 브라우저 설치 (Chromium)
-npx playwright install chromium
-
-# 브라우저 의존성 재확인
-npx playwright install-deps chromium
+# 브라우저 의존성 재확인 (필요시)
+npx patchright install-deps chromium
 ```
 
 ## 4. 설정 파일 확인
@@ -98,8 +96,11 @@ npx playwright install-deps chromium
 ## 5. 기본 실행 테스트
 
 ```bash
-# API 모드 단일 실행 테스트
-node index.js --api --instance 1 --threads 1 --once
+# 단일 실행 테스트
+node index.js --threads 1 --once
+
+# 4쓰레드 연속 실행
+node index.js --threads 4
 ```
 
 ## 6. 서비스 모드 설정 (선택사항)
@@ -119,8 +120,8 @@ After=network.target
 [Service]
 Type=simple
 User=tech
-WorkingDirectory=/home/tech/coupang_agent_v1
-ExecStart=/usr/bin/node index.js --api --instance 1 --threads 4
+WorkingDirectory=/home/tech/coupang_agent_v2
+ExecStart=/usr/bin/node index.js --threads 4
 Restart=always
 RestartSec=10
 Environment=NODE_ENV=production
@@ -212,13 +213,13 @@ git pull origin main
 # 의존성 업데이트
 npm install
 
-# Playwright 업데이트
-npx playwright install chromium
+# Patchright 업데이트
+npx patchright install chromium
 ```
 
 ## 9. 허브 서버 정보
 
-- **URL**: http://mkt.techb.kr:3001
+- **URL**: http://61.84.75.37:3302
 - **작업 할당**: 자동
 - **프록시 관리**: 자동
 - **결과 제출**: 자동

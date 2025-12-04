@@ -67,7 +67,10 @@ lib/
 └── utils/                   # 유틸리티
     ├── browser-helpers.js
     ├── cli-parser.js
-    └── ...
+    ├── common-helpers.js
+    ├── human-click.js
+    ├── human-simulation.js  # Akamai 우회용 자연스러운 행동
+    └── ubuntu-setup.js
 ```
 
 ## 주요 개선사항
