@@ -171,6 +171,7 @@ def main():
     success = 0
     failed = 0
     skipped = 0
+    updated = 0
 
     for i, major in enumerate(versions_to_install, 1):
         info = major_builds[major]
@@ -186,19 +187,34 @@ def main():
 
         # 이미 설치되어 있는지 확인 (메이저 버전 기준)
         existing = None
+        existing_revision = 0
         for d in os.listdir(INSTALL_DIR) if os.path.exists(INSTALL_DIR) else []:
             if d.startswith(f'chrome-{major}-') or d.startswith(f'chrome-{major}.'):
                 check_path = os.path.join(INSTALL_DIR, d, 'chrome-linux64', 'chrome')
-                # 기존 구조(opt/google/chrome)도 체크
                 check_path_old = os.path.join(INSTALL_DIR, d, 'opt', 'google', 'chrome', 'chrome')
                 if os.path.exists(check_path) or os.path.exists(check_path_old):
                     existing = d
+                    # 기존 버전의 revision 추출 (마지막 숫자)
+                    try:
+                        parts = d.replace('chrome-', '').replace('-', '.').split('.')
+                        if len(parts) >= 4:
+                            existing_revision = int(parts[3])
+                    except:
+                        pass
                     break
 
+        # 새 빌드가 더 높으면 기존 삭제 후 설치, 같거나 낮으면 스킵
+        new_revision = info['revision']
         if existing:
-            print(f"  {YELLOW}Already installed ({existing}), skipping{NC}")
-            skipped += 1
-            continue
+            if new_revision <= existing_revision:
+                print(f"  {YELLOW}Already up-to-date ({existing}), skipping{NC}")
+                skipped += 1
+                continue
+            else:
+                print(f"  {BLUE}Updating: {existing_revision} → {new_revision}{NC}")
+                import shutil as sh
+                sh.rmtree(os.path.join(INSTALL_DIR, existing))
+                updated += 1
 
         try:
             # 다운로드
@@ -245,7 +261,7 @@ def main():
     # 결과 요약
     print(f"\n{GREEN}========================================{NC}")
     print(f"{GREEN}Installation Complete{NC}")
-    print(f"{GREEN}Success: {success}, Skipped: {skipped}, Failed: {failed}{NC}")
+    print(f"{GREEN}Success: {success}, Updated: {updated}, Skipped: {skipped}, Failed: {failed}{NC}")
     print(f"{GREEN}========================================{NC}")
     print(f"\n{BLUE}Chrome installations: {INSTALL_DIR}{NC}")
     print(f"{BLUE}설치 확인: ./install-chrome.sh list{NC}")
