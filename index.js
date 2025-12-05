@@ -25,9 +25,49 @@
  *   node index.js --threads 4 2>&1 | tee "logs/$(date +%Y%m%d_%H%M%S).log"  # 날짜별 저장
  */
 
+// Linux 환경에서 DISPLAY 환경변수 설정 (모듈 로드 전에 설정)
+if (process.platform === 'linux' && !process.env.DISPLAY) {
+  process.env.DISPLAY = ':0';
+}
+
 const { parseArgs, printHelp } = require('./lib/utils/cli-parser');
 const { runApiMode } = require('./lib/core/api-mode');
 const UbuntuSetup = require('./lib/utils/ubuntu-setup');
+const fs = require('fs');
+const path = require('path');
+
+/**
+ * 브라우저 프로필 초기화
+ * 시작 시 손상된 프로필로 인한 오류 방지
+ */
+function cleanBrowserProfiles(threadCount) {
+  const browserDataDir = path.join(__dirname, 'browser-data');
+
+  if (!fs.existsSync(browserDataDir)) {
+    return;
+  }
+
+  console.log('🧹 브라우저 프로필 초기화 중...');
+  let cleaned = 0;
+
+  for (let i = 1; i <= threadCount; i++) {
+    const folderName = String(i).padStart(2, '0');
+    const profilePath = path.join(browserDataDir, folderName);
+
+    if (fs.existsSync(profilePath)) {
+      try {
+        fs.rmSync(profilePath, { recursive: true, force: true });
+        cleaned++;
+      } catch (e) {
+        // 무시
+      }
+    }
+  }
+
+  if (cleaned > 0) {
+    console.log(`   ✅ ${cleaned}개 프로필 초기화 완료`);
+  }
+}
 
 // 메인 실행 함수
 async function main() {
@@ -48,7 +88,10 @@ async function main() {
         console.log('node -e "require(\'./lib/utils/ubuntu-setup\').checkAll()"');
       }
     }
-    
+
+    // 브라우저 프로필 초기화 (시작 시 손상된 프로필 방지)
+    cleanBrowserProfiles(options.threads || 4);
+
     // API 모드로만 실행
     console.log(`🚀 API 모드 실행 시작\n`);
     await runApiMode(options);
