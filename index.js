@@ -30,6 +30,37 @@ if (process.platform === 'linux' && !process.env.DISPLAY) {
   process.env.DISPLAY = ':0';
 }
 
+// 글로벌 에러 핸들러 - 프로세스 종료 방지
+process.on('unhandledRejection', (reason, promise) => {
+  // Patchright/Playwright 세션 종료 관련 에러는 무시
+  const errorMessage = reason?.message || String(reason);
+  if (errorMessage.includes('session closed') ||
+      errorMessage.includes('Target closed') ||
+      errorMessage.includes('Protocol error') ||
+      errorMessage.includes('Connection closed')) {
+    console.log(`⚠️ 브라우저 세션 종료 에러 (무시됨): ${errorMessage.substring(0, 100)}`);
+    return;
+  }
+  console.error('❌ Unhandled Rejection:', errorMessage);
+});
+
+process.on('uncaughtException', (error) => {
+  // Patchright/Playwright 세션 종료 관련 에러는 무시
+  const errorMessage = error?.message || String(error);
+  if (errorMessage.includes('session closed') ||
+      errorMessage.includes('Target closed') ||
+      errorMessage.includes('Protocol error') ||
+      errorMessage.includes('Connection closed')) {
+    console.log(`⚠️ 브라우저 세션 종료 에러 (무시됨): ${errorMessage.substring(0, 100)}`);
+    return;
+  }
+  console.error('❌ Uncaught Exception:', errorMessage);
+  // 심각한 에러의 경우에만 종료
+  if (!errorMessage.includes('ECONNRESET') && !errorMessage.includes('EPIPE')) {
+    process.exit(1);
+  }
+});
+
 const { parseArgs, printHelp } = require('./lib/utils/cli-parser');
 const { runApiMode } = require('./lib/core/api-mode');
 const UbuntuSetup = require('./lib/utils/ubuntu-setup');
