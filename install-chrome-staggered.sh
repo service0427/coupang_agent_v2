@@ -153,21 +153,42 @@ for major in "${MAJOR_VERSIONS[@]}"; do
         target_rank=$((FIXED_RANK - 1))  # 0-based index
     fi
 
-    # 해당 메이저 버전 중에서 target_rank번째로 최신인 빌드 찾기
-    count=0
+    # 해당 메이저 버전의 빌드를 3번째 숫자 기준으로 그룹화
+    declare -A build_groups
     for i in "${!ALL_VERSIONS[@]}"; do
         version=$(echo "${ALL_VERSIONS[$i]}" | cut -d'|' -f1)
         ver_major=$(echo "$version" | cut -d. -f1)
 
         if [ "$ver_major" = "$major" ]; then
-            if [ "$count" -eq "$target_rank" ]; then
-                SELECTED_VERSIONS[$major]="${ALL_VERSIONS[$i]}"
-                echo -e "  ${CYAN}Chrome $major${NC}: $version (rank: $((target_rank + 1)))"
-                break
+            # 3번째 숫자 추출 (BUILD 번호)
+            build_num=$(echo "$version" | cut -d. -f3)
+
+            # 이 BUILD 번호의 첫 번째 버전만 저장
+            if [ -z "${build_groups[$build_num]}" ]; then
+                build_groups[$build_num]="${ALL_VERSIONS[$i]}"
             fi
-            ((count++))
         fi
     done
+
+    # BUILD 번호 기준으로 정렬하고 target_rank번째 선택
+    sorted_builds=($(echo "${!build_groups[@]}" | tr ' ' '\n' | sort -rn))
+
+    if [ "${#sorted_builds[@]}" -gt "$target_rank" ]; then
+        selected_build="${sorted_builds[$target_rank]}"
+        SELECTED_VERSIONS[$major]="${build_groups[$selected_build]}"
+        version=$(echo "${build_groups[$selected_build]}" | cut -d'|' -f1)
+        echo -e "  ${CYAN}Chrome $major${NC}: $version (rank: $((target_rank + 1)), build: $selected_build)"
+    else
+        # rank가 너무 높으면 마지막 빌드 선택
+        last_idx=$((${#sorted_builds[@]} - 1))
+        selected_build="${sorted_builds[$last_idx]}"
+        SELECTED_VERSIONS[$major]="${build_groups[$selected_build]}"
+        version=$(echo "${build_groups[$selected_build]}" | cut -d'|' -f1)
+        echo -e "  ${CYAN}Chrome $major${NC}: $version (rank: $((last_idx + 1))/${#sorted_builds[@]}, build: $selected_build)"
+    fi
+
+    # 그룹 초기화
+    unset build_groups
 
     # staggered 모드에서만 index 증가
     if [ "$RANK_MODE" = "staggered" ]; then
