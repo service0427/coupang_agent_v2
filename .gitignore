@@ -157,3 +157,6 @@ clean-shared-cache.sh
 
 # Claude Code 참고 문서 (개발 서버 전용)
 CLAUDE.md
+
+# Chrome 버전 바이너리 (용량이 크므로 제외)
+chrome-versions/
